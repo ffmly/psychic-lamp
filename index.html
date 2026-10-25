@@ -1,3 +1,4 @@
+
 <!doctype html>
 <html lang="en">
   <head>
@@ -25,9 +26,11 @@
     <link rel="stylesheet" href="styles.css" />
     <script src="script.js" defer></script>
   </head>
+
   <body>
     <main class="page" id="top">
       <div class="paper-art" aria-hidden="true"></div>
+
       <div class="page-content">
         <header class="brand" aria-label="Unibyte Scientific Club">
           <span class="logo-crop">
@@ -38,7 +41,12 @@
 
         <section class="intro" aria-labelledby="page-title">
           <p class="intro-kicker"><span></span> You are invited <span></span></p>
-          <h1 id="page-title"><span>Unibyte</span> <strong>Open Day</strong></h1>
+
+          <h1 id="page-title">
+            <span>Unibyte</span>
+            <strong>Open Day</strong>
+          </h1>
+
           <p class="intro-copy">
             Meet the minds. Explore the ideas.<br class="desktop-break" />
             Find your place with us.
@@ -53,10 +61,19 @@
 
           <div class="player-wrap">
             <div class="player-shadow" aria-hidden="true"></div>
+
             <div class="player" id="teaser-player" data-state="placeholder">
-              <video id="teaser-video" preload="metadata" playsinline aria-hidden="true" aria-label="Unibyte Open Day teaser video"></video>
+              <video
+                id="teaser-video"
+                preload="metadata"
+                playsinline
+                aria-hidden="true"
+                aria-label="Unibyte Open Day teaser video"
+              ></video>
+
               <div class="player-vignette" aria-hidden="true"></div>
               <div class="player-grid" aria-hidden="true"></div>
+
               <div class="player-corner player-corner-tl" aria-hidden="true"></div>
               <div class="player-corner player-corner-tr" aria-hidden="true"></div>
               <div class="player-corner player-corner-bl" aria-hidden="true"></div>
@@ -70,44 +87,173 @@
 
               <div class="player-center" id="player-center">
                 <p class="player-eyebrow">THE STORY BEGINS HERE</p>
-                <button class="play-button" id="play-button" type="button" aria-label="Teaser video coming soon">
-                  <svg class="play-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5.2a1 1 0 0 1 1.52-.85l10 6.8a1 1 0 0 1 0 1.7l-10 6.8A1 1 0 0 1 8 18.8V5.2Z"/></svg>
-                  <svg class="pause-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/></svg>
+
+                <button
+                  class="play-button"
+                  id="play-button"
+                  type="button"
+                  aria-label="Teaser video coming soon"
+                >
+                  <svg
+                    class="play-icon"
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                    aria-hidden="true"
+                  >
+                    <path d="M8 5.2a1 1 0 0 1 1.52-.85l10 6.8a1 1 0 0 1 0 1.7l-10 6.8A1 1 0 0 1 8 18.8V5.2Z" />
+                  </svg>
+
+                  <svg
+                    class="pause-icon"
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                    aria-hidden="true"
+                  >
+                    <rect x="6" y="5" width="4" height="14" rx="1" />
+                    <rect x="14" y="5" width="4" height="14" rx="1" />
+                  </svg>
                 </button>
-                <p class="player-message" id="player-message" role="status">Teaser coming soon</p>
+
+                <p class="player-message" id="player-message" role="status">
+                  Teaser coming soon
+                </p>
               </div>
 
               <div class="player-controls" aria-label="Video controls">
-                <button class="control-button" id="control-play" type="button" aria-label="Play teaser" disabled>
-                  <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="m8 5 11 7-11 7V5Z"/></svg>
+                <button
+                  class="control-button"
+                  id="control-play"
+                  type="button"
+                  aria-label="Play teaser"
+                  disabled
+                >
+                  <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                    <path d="m8 5 11 7-11 7V5Z" />
+                  </svg>
                 </button>
+
                 <span class="time-label" id="current-time">00:00</span>
-                <input id="progress" class="progress" type="range" min="0" max="1000" value="0" aria-label="Video progress" disabled />
+
+                <input
+                  id="progress"
+                  class="progress"
+                  type="range"
+                  min="0"
+                  max="1000"
+                  value="0"
+                  aria-label="Video progress"
+                  disabled
+                />
+
                 <span class="time-label" id="duration">--:--</span>
-                <button class="control-button" id="mute-button" type="button" aria-label="Mute video" disabled>
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5 6 9H3v6h3l5 4V5Z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18 6a8.5 8.5 0 0 1 0 12"/></svg>
+
+                <button
+                  class="control-button"
+                  id="mute-button"
+                  type="button"
+                  aria-label="Mute video"
+                  disabled
+                >
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.8"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    aria-hidden="true"
+                  >
+                    <path d="M11 5 6 9H3v6h3l5 4V5Z" />
+                    <path d="M15.5 8.5a5 5 0 0 1 0 7" />
+                    <path d="M18 6a8.5 8.5 0 0 1 0 12" />
+                  </svg>
                 </button>
-                <button class="control-button" id="fullscreen-button" type="button" aria-label="Enter fullscreen" disabled>
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 3H4a1 1 0 0 0-1 1v4M16 3h4a1 1 0 0 1 1 1v4M3 16v4a1 1 0 0 0 1 1h4m13-5v4a1 1 0 0 1-1 1h-4"/></svg>
+
+                <button
+                  class="control-button"
+                  id="fullscreen-button"
+                  type="button"
+                  aria-label="Enter fullscreen"
+                  disabled
+                >
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.8"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    aria-hidden="true"
+                  >
+                    <path d="M8 3H4a1 1 0 0 0-1 1v4M16 3h4a1 1 0 0 1 1 1v4M3 16v4a1 1 0 0 0 1 1h4m13-5v4a1 1 0 0 1-1 1h-4" />
+                  </svg>
                 </button>
               </div>
             </div>
           </div>
-          <p class="teaser-note">The teaser will appear here soon. Stay curious.</p>
+
+          <p class="teaser-note">
+            The teaser will appear here soon. Stay curious.
+          </p>
         </section>
 
-        <section class="action" aria-label="Register for Open Day">
+        <section class="action" aria-label="Unibyte links and Open Day registration">
           <p>Ready to be part of it?</p>
-          <a class="register-button" href="https://www.unibyteclub.tech/#contact">
-            <span>Register</span>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14m-6-6 6 6-6 6"/></svg>
+
+          <!-- Working button: opens the official Instagram page -->
+          <a
+            class="register-button"
+            href="https://www.instagram.com/unibyte.cs/"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <span>Our Page</span>
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+            >
+              <path d="M5 12h14m-6-6 6 6-6 6" />
+            </svg>
           </a>
-          <span class="action-caption">See you at Unibyte Open Day</span>
+
+          <!-- Informational button: intentionally does not navigate anywhere -->
+          <button
+            class="onsite-button"
+            type="button"
+            aria-disabled="true"
+            tabindex="-1"
+          >
+            <span>Registration at Open Day</span>
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+            >
+              <path d="M12 8v4m0 4h.01" />
+              <circle cx="12" cy="12" r="9" />
+            </svg>
+          </button>
+
+          <span class="action-caption">
+            Registration takes place on-site. Be there!
+          </span>
         </section>
 
         <footer class="footer">
           <span>UNIBYTE SCIENTIFIC CLUB</span>
-          <span>DISCOVER <span class="footer-star">✦</span> CREATE <span class="footer-star">✦</span> CONNECT</span>
+          <span>
+            DISCOVER <span class="footer-star">✦</span> CREATE
+            <span class="footer-star">✦</span> CONNECT
+          </span>
         </footer>
       </div>
     </main>
