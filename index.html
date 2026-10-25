@@ -25,6 +25,74 @@
     />
     <link rel="stylesheet" href="styles.css" />
     <script src="script.js" defer></script>
+
+    <!-- Countdown styling -->
+    <style>
+      .teaser-countdown {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: clamp(8px, 2vw, 18px);
+        margin-top: 22px;
+        color: #fff;
+        font-family: "Montserrat", sans-serif;
+      }
+
+      .teaser-countdown-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        min-width: clamp(48px, 8vw, 72px);
+      }
+
+      .teaser-countdown-number {
+        font-size: clamp(1.7rem, 5vw, 3rem);
+        font-weight: 800;
+        line-height: 1.1;
+        font-variant-numeric: tabular-nums;
+        letter-spacing: -0.04em;
+      }
+
+      .teaser-countdown-label {
+        margin-top: 7px;
+        font-size: 0.58rem;
+        font-weight: 600;
+        letter-spacing: 0.12em;
+        opacity: 0.7;
+      }
+
+      .teaser-countdown-separator {
+        align-self: flex-start;
+        padding-top: 1px;
+        font-size: clamp(1.5rem, 4vw, 2.5rem);
+        opacity: 0.6;
+      }
+
+      .teaser-countdown-status {
+        margin: 14px 0 0;
+        color: #fff;
+        font-size: 0.75rem;
+        letter-spacing: 0.12em;
+        text-align: center;
+        text-transform: uppercase;
+        opacity: 0.8;
+      }
+
+      @media (max-width: 380px) {
+        .teaser-countdown {
+          gap: 6px;
+        }
+
+        .teaser-countdown-item {
+          min-width: 43px;
+        }
+
+        .teaser-countdown-label {
+          font-size: 0.5rem;
+          letter-spacing: 0.08em;
+        }
+      }
+    </style>
   </head>
 
   <body>
@@ -93,25 +161,72 @@
                   type="button"
                   aria-label="Teaser video coming soon"
                 >
-                  <svg class="play-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                    <path d="M8 5.2a1 1 0 0 1 1.52-.85l10 6.8a1 1 0 0 1 0 1.7l-10 6.8A1 1 0 0 1 8 18.8V5.2Z"/>
+                  <svg
+                    class="play-icon"
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                    aria-hidden="true"
+                  >
+                    <path d="M8 5.2a1 1 0 0 1 1.52-.85l10 6.8a1 1 0 0 1 0 1.7l-10 6.8A1 1 0 0 1 8 18.8V5.2Z" />
                   </svg>
 
-                  <svg class="pause-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                    <rect x="6" y="5" width="4" height="14" rx="1"/>
-                    <rect x="14" y="5" width="4" height="14" rx="1"/>
+                  <svg
+                    class="pause-icon"
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                    aria-hidden="true"
+                  >
+                    <rect x="6" y="5" width="4" height="14" rx="1" />
+                    <rect x="14" y="5" width="4" height="14" rx="1" />
                   </svg>
                 </button>
 
                 <p class="player-message" id="player-message" role="status">
                   Teaser coming soon
                 </p>
+
+                <!-- NEW: Countdown timer -->
+                <div
+                  class="teaser-countdown"
+                  id="teaser-countdown"
+                  role="timer"
+                  aria-label="Time remaining until the teaser release"
+                >
+                  <div class="teaser-countdown-item">
+                    <span class="teaser-countdown-number" id="countdown-hours">24</span>
+                    <span class="teaser-countdown-label">HOURS</span>
+                  </div>
+
+                  <span class="teaser-countdown-separator" aria-hidden="true">:</span>
+
+                  <div class="teaser-countdown-item">
+                    <span class="teaser-countdown-number" id="countdown-minutes">00</span>
+                    <span class="teaser-countdown-label">MINUTES</span>
+                  </div>
+
+                  <span class="teaser-countdown-separator" aria-hidden="true">:</span>
+
+                  <div class="teaser-countdown-item">
+                    <span class="teaser-countdown-number" id="countdown-seconds">00</span>
+                    <span class="teaser-countdown-label">SECONDS</span>
+                  </div>
+                </div>
+
+                <p class="teaser-countdown-status" id="countdown-status">
+                  Something exciting is on the way
+                </p>
               </div>
 
               <div class="player-controls" aria-label="Video controls">
-                <button class="control-button" id="control-play" type="button" aria-label="Play teaser" disabled>
+                <button
+                  class="control-button"
+                  id="control-play"
+                  type="button"
+                  aria-label="Play teaser"
+                  disabled
+                >
                   <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                    <path d="m8 5 11 7-11 7V5Z"/>
+                    <path d="m8 5 11 7-11 7V5Z" />
                   </svg>
                 </button>
 
@@ -130,17 +245,45 @@
 
                 <span class="time-label" id="duration">--:--</span>
 
-                <button class="control-button" id="mute-button" type="button" aria-label="Mute video" disabled>
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                    <path d="M11 5 6 9H3v6h3l5 4V5Z"/>
-                    <path d="M15.5 8.5a5 5 0 0 1 0 7"/>
-                    <path d="M18 6a8.5 8.5 0 0 1 0 12"/>
+                <button
+                  class="control-button"
+                  id="mute-button"
+                  type="button"
+                  aria-label="Mute video"
+                  disabled
+                >
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.8"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    aria-hidden="true"
+                  >
+                    <path d="M11 5 6 9H3v6h3l5 4V5Z" />
+                    <path d="M15.5 8.5a5 5 0 0 1 0 7" />
+                    <path d="M18 6a8.5 8.5 0 0 1 0 12" />
                   </svg>
                 </button>
 
-                <button class="control-button" id="fullscreen-button" type="button" aria-label="Enter fullscreen" disabled>
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                    <path d="M8 3H4a1 1 0 0 0-1 1v4M16 3h4a1 1 0 0 1 1 1v4M3 16v4a1 1 0 0 0 1 1h4m13-5v4a1 1 0 0 1-1 1h-4"/>
+                <button
+                  class="control-button"
+                  id="fullscreen-button"
+                  type="button"
+                  aria-label="Enter fullscreen"
+                  disabled
+                >
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.8"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    aria-hidden="true"
+                  >
+                    <path d="M8 3H4a1 1 0 0 0-1 1v4M16 3h4a1 1 0 0 1 1 1v4M3 16v4a1 1 0 0 0 1 1h4m13-5v4a1 1 0 0 1-1 1h-4" />
                   </svg>
                 </button>
               </div>
@@ -181,11 +324,14 @@
         <footer class="footer">
           <span>UNIBYTE SCIENTIFIC CLUB</span>
           <span>
-            DISCOVER <span class="footer-star">✦</span> CREATE
-            <span class="footer-star">✦</span> CONNECT
+            DISCOVER <span class="footer-star">✦</span>
+            CREATE <span class="footer-star">✦</span>
+            CONNECT
           </span>
         </footer>
       </div>
     </main>
+
+
   </body>
 </html>
