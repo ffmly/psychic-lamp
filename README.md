@@ -23,3 +23,4 @@ The custom player enables playback, seeking, mute, and fullscreen once the video
 
 - 2026-10-29 — Verified the GitHub remote and documented the project’s local preview workflow during routine maintenance.
 - 2026-10-30 — Confirmed the published branch is current and retained the local preview instructions for straightforward static-site checks.
+- 2026-10-31 — Checked the upstream branch and kept the deployment-facing documentation current as part of routine project maintenance.
