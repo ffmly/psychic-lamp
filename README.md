@@ -19,6 +19,10 @@ Then open `http://localhost:4173`.
 
 The custom player enables playback, seeking, mute, and fullscreen once the video source is set. The Register button goes to the club website's contact section.
 
+## Countdown behavior
+
+The teaser countdown starts at 24 hours for each visitor and stores its deadline in that browser's `localStorage` under `unibyteTeaserCountdownDeadline`. It is not a shared event deadline: a first visit in another browser starts a separate timer, and an expired timer starts again on a later page load. If the teaser must unlock for everyone at the same time, replace the per-browser deadline in `script.js` with a fixed release timestamp before publishing that announcement.
+
 ## Daily activity log
 
 - 2026-10-29 — Verified the GitHub remote and documented the project’s local preview workflow during routine maintenance.
