@@ -17,7 +17,11 @@ Then open `http://localhost:4173`.
 1. Put the vertical 9:16 video in `assets/teaser.mp4`.
 2. Set `TEASER_VIDEO_URL` in `script.js` to `'assets/teaser.mp4'`.
 
-The custom player enables playback, seeking, mute, and fullscreen once the video source is set. The Register button goes to the club website's contact section.
+The custom player enables playback, seeking, mute, and fullscreen once the video source is set.
+
+## Registration and links
+
+The active **Our Page** link opens the club's Instagram profile. Registration is currently described as taking place on-site at Open Day; the **Registration at Open Day** button is disabled. Update the page copy and button behavior in `index.html` if the registration process changes.
 
 ## Countdown behavior
 
