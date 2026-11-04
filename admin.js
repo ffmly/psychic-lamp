@@ -1,22 +1,24 @@
 const login = document.getElementById('admin-login');
 const tokenInput = document.getElementById('admin-token');
+const loginMessage = document.getElementById('admin-login-message');
 const message = document.getElementById('admin-message');
+const gate = document.getElementById('admin-gate');
+const dashboard = document.getElementById('admin-dashboard');
 const content = document.getElementById('admin-content');
 const tbody = document.getElementById('entries');
 const limitInput = document.getElementById('participant-limit');
 let entries = [];
 let campaign = { claimed: 0, limit: 15, cycle: 1 };
-
-tokenInput.value = sessionStorage.getItem('unibyteGiveawayAdminToken') || '';
+let adminToken = '';
 
 function escapeHtml(value) {
   return String(value ?? '').replace(/[&<>'"]/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' })[char]);
 }
 
-function authHeaders(withJson = false) {
+function authHeaders(withJson = false, token = adminToken) {
   return {
     ...(withJson ? { 'Content-Type': 'application/json' } : {}),
-    Authorization: `Bearer ${tokenInput.value.trim()}`,
+    Authorization: `Bearer ${token}`,
   };
 }
 
@@ -29,20 +31,30 @@ function answerDetails(entry) {
 async function request(url, options = {}) {
   const response = await fetch(url, options);
   const payload = await response.json().catch(() => ({}));
-  if (!response.ok) throw new Error(payload.message || 'فشل الطلب.');
+  if (!response.ok) {
+    const error = new Error(payload.message || 'فشل الطلب.');
+    error.status = response.status;
+    throw error;
+  }
   return payload;
 }
 
-async function loadEntries() {
-  const token = tokenInput.value.trim();
+async function loadEntries(token = adminToken) {
   if (!token) return;
-  message.textContent = 'جاري التحميل…';
+  const firstLogin = !adminToken;
+  const statusBox = firstLogin ? loginMessage : message;
+  statusBox.textContent = 'جاري التحقق…';
   try {
-    const payload = await request('/api/admin', { headers: authHeaders() });
-    sessionStorage.setItem('unibyteGiveawayAdminToken', token);
+    const payload = await request('/api/admin', { headers: authHeaders(false, token) });
+    adminToken = token;
     entries = payload.entries || [];
     campaign = payload.campaign || campaign;
+    gate.hidden = true;
+    dashboard.hidden = false;
+    document.title = 'Unibyte · Canva Giveaway Admin';
     content.hidden = false;
+    tokenInput.value = '';
+    loginMessage.textContent = '';
     message.textContent = '';
     document.getElementById('claimed').textContent = campaign.claimed;
     document.getElementById('limit').textContent = campaign.limit;
@@ -53,8 +65,15 @@ async function loadEntries() {
     tbody.innerHTML = entries.map((entry) => `<tr><td>${escapeHtml(entry.cycle || 1)} / ${escapeHtml(entry.rank)}</td><td><strong>${escapeHtml(entry.fullName)}</strong></td><td><a href="mailto:${encodeURIComponent(entry.email)}">${escapeHtml(entry.email)}</a></td><td>${escapeHtml(entry.studyYear)}</td><td>${escapeHtml(entry.heardAboutUnibyte)}</td><td>${escapeHtml(entry.willAttend)}</td><td>${escapeHtml(entry.discoverySource)}</td><td>${escapeHtml(entry.interest)}</td><td>${escapeHtml(entry.preferredActivity)}</td><td>${answerDetails(entry)}</td><td>${escapeHtml(entry.score)}/3</td><td><button class="activation ${entry.activated ? 'yes' : 'no'}" data-id="${entry.id}" data-active="${entry.activated}" type="button">${entry.activated ? 'تم التفعيل' : 'علّم كمفعّل'}</button></td><td>${entry.submittedAt ? new Date(entry.submittedAt).toLocaleString('ar-DZ') : '—'}</td></tr>`).join('');
     document.querySelectorAll('.activation').forEach((button) => button.addEventListener('click', () => updateActivation(button)));
   } catch (error) {
-    content.hidden = true;
-    message.textContent = error.message || 'تعذر فتح لوحة الأدمن.';
+    if (firstLogin) {
+      adminToken = '';
+      dashboard.hidden = true;
+      gate.hidden = false;
+      loginMessage.textContent = error.status === 401 ? 'رمز الإدارة غير صحيح.' : 'تعذر فتح لوحة الإدارة الآن.';
+      tokenInput.select();
+    } else {
+      message.textContent = error.message || 'تعذر تحديث لوحة الإدارة.';
+    }
   }
 }
 
@@ -73,8 +92,20 @@ async function updateActivation(button) {
   }
 }
 
-login.addEventListener('submit', (event) => { event.preventDefault(); loadEntries(); });
+login.addEventListener('submit', (event) => { event.preventDefault(); loadEntries(tokenInput.value.trim()); });
 document.getElementById('refresh').addEventListener('click', loadEntries);
+document.getElementById('logout').addEventListener('click', () => {
+  adminToken = '';
+  entries = [];
+  tbody.innerHTML = '';
+  dashboard.hidden = true;
+  gate.hidden = false;
+  document.title = 'Unibyte · Admin Access';
+  message.textContent = '';
+  loginMessage.textContent = '';
+  tokenInput.value = '';
+  tokenInput.focus();
+});
 
 document.getElementById('limit-form').addEventListener('submit', async (event) => {
   event.preventDefault();
@@ -114,8 +145,7 @@ document.getElementById('export').addEventListener('click', () => {
 });
 
 document.getElementById('reset-data').addEventListener('click', async () => {
-  const token = tokenInput.value.trim();
-  if (!token) { message.textContent = 'أدخل Admin token أولًا.'; tokenInput.focus(); return; }
+  if (!adminToken) return;
   const confirmation = window.prompt('هذا يمسح المشاركات وحماية IP والجهاز ويعيد الإعدادات. اكتب DELETE للتأكيد:');
   if (confirmation !== 'DELETE') { message.textContent = confirmation === null ? 'تم إلغاء المسح.' : 'كلمة التأكيد غير صحيحة.'; return; }
   const button = document.getElementById('reset-data');
@@ -131,5 +161,3 @@ document.getElementById('reset-data').addEventListener('click', async () => {
     button.disabled = false;
   }
 });
-
-if (tokenInput.value) loadEntries();

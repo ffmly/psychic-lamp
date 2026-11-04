@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Unibyte · Canva Giveaway Admin</title>
+    <title>Unibyte · Admin Access</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Montserrat:wght@600;700;800&display=swap" rel="stylesheet" />
@@ -16,6 +16,11 @@
       .admin-head h1 { font-size: clamp(24px, 4vw, 42px); letter-spacing: -.05em; }
       .admin-login { margin: 28px 0; }
       .admin-login input { flex: 1; height: 48px; padding: 0 14px; border: 1px solid #68127335; border-radius: 12px; }
+      .admin-gate { width: min(520px, 100%); margin: min(18vh, 160px) auto; text-align: center; }
+      .admin-gate h1 { margin: 10px 0 4px; font-size: clamp(26px, 5vw, 40px); }
+      .admin-gate p { color: #765879; }
+      .admin-gate .admin-login { margin-bottom: 12px; }
+      [hidden] { display: none !important; }
       .admin-button { height: 48px; padding: 0 18px; border: 0; border-radius: 12px; color: white; background: var(--plum); font-weight: 700; cursor: pointer; }
       .admin-button.danger { background: #b42318; }
       .admin-button:disabled { cursor: wait; opacity: .55; }
@@ -45,14 +50,21 @@
   </head>
   <body>
     <main class="admin-page">
-      <header class="admin-head"><div><p class="teaser-index">OPEN DAY CAMPAIGN</p><h1>Canva Giveaway</h1></div><div class="admin-actions"><button class="admin-button" id="refresh" type="button">تحديث</button><button class="admin-button" id="export" type="button">تصدير CSV</button><button class="admin-button" id="reset-counter" type="button">تصفير العداد مع إبقاء المشاركات</button><button class="admin-button danger" id="reset-data" type="button">مسح كل بيانات التجارب</button></div></header>
-      <div class="admin-help"><strong>كيفاش تدخل؟</strong> افتح <code>/admin.html</code> في رابط الموقع، وأدخل القيمة السرية الموجودة في Vercel باسم <code>GIVEAWAY_ADMIN_TOKEN</code>. هذا الرمز يبقى عند الأدمن فقط ولا تحطّه في كود الواجهة.</div>
-      <form class="admin-login" id="admin-login"><input id="admin-token" type="password" autocomplete="current-password" placeholder="Admin token" /><button class="admin-button" type="submit">Open dashboard</button></form>
-      <p id="admin-message"></p>
-      <section id="admin-content" hidden>
+      <section class="admin-gate" id="admin-gate">
+        <p class="teaser-index">SECURE ACCESS</p>
+        <h1>دخول الإدارة</h1>
+        <p>أدخل رمز الإدارة للمتابعة.</p>
+        <form class="admin-login" id="admin-login"><input id="admin-token" type="password" autocomplete="current-password" placeholder="Admin token" autofocus /><button class="admin-button" type="submit">دخول</button></form>
+        <p id="admin-login-message" role="alert" aria-live="polite"></p>
+      </section>
+      <section id="admin-dashboard" hidden>
+        <header class="admin-head"><div><p class="teaser-index">OPEN DAY CAMPAIGN</p><h1>Canva Giveaway</h1></div><div class="admin-actions"><button class="admin-button" id="refresh" type="button">تحديث</button><button class="admin-button" id="export" type="button">تصدير CSV</button><button class="admin-button" id="reset-counter" type="button">تصفير العداد مع إبقاء المشاركات</button><button class="admin-button danger" id="reset-data" type="button">مسح كل بيانات التجارب</button><button class="admin-button" id="logout" type="button">خروج</button></div></header>
+        <p id="admin-message" role="status" aria-live="polite"></p>
+        <section id="admin-content">
         <div class="admin-stats"><div class="admin-stat"><strong id="claimed">0</strong>العداد الحالي</div><div class="admin-stat"><strong id="limit">0</strong>الحد الأقصى</div><div class="admin-stat"><strong id="cycle">1</strong>الدورة</div><div class="admin-stat"><strong id="activated">0</strong>تم تفعيلهم</div><div class="admin-stat"><strong id="pending">0</strong>في الانتظار</div></div>
         <form class="admin-settings" id="limit-form"><label>عدد المشاركات المسموح بها<input id="participant-limit" type="number" min="1" max="5000" required /></label><button class="admin-button" type="submit">حفظ العدد</button></form>
         <div class="admin-table-wrap"><table><thead><tr><th>الدورة / الترتيب</th><th>الاسم</th><th>إيميل Canva</th><th>السنة</th><th>يعرف النادي؟</th><th>الحضور</th><th>مصدر التعرف</th><th>المجال</th><th>النشاط</th><th>إجابات الكويز</th><th>النتيجة</th><th>التفعيل</th><th>وقت المشاركة</th></tr></thead><tbody id="entries"></tbody></table></div>
+        </section>
       </section>
     </main>
   </body>
