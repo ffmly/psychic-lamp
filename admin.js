@@ -146,7 +146,7 @@ document.getElementById('export').addEventListener('click', () => {
 
 document.getElementById('reset-data').addEventListener('click', async () => {
   if (!adminToken) return;
-  const confirmation = window.prompt('هذا يمسح المشاركات وحماية IP والجهاز ويعيد الإعدادات. اكتب DELETE للتأكيد:');
+  const confirmation = window.prompt('هذا يمسح المشاركات ويعيد الإعدادات. اكتب DELETE للتأكيد:');
   if (confirmation !== 'DELETE') { message.textContent = confirmation === null ? 'تم إلغاء المسح.' : 'كلمة التأكيد غير صحيحة.'; return; }
   const button = document.getElementById('reset-data');
   button.disabled = true;

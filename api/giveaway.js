@@ -1,4 +1,4 @@
-const { createHash } = require('crypto');
+const { createHash, randomUUID } = require('crypto');
 const { db } = require('./_firebase');
 const { FieldValue } = require('firebase-admin/firestore');
 
@@ -75,22 +75,13 @@ module.exports = async function handler(req, res) {
     const email = String(req.body.email).trim().toLowerCase();
     const deviceId = String(req.body.deviceId).trim();
     const ip = clientIp(req);
-    if (!ip) return send(res, 400, { message: 'تعذر التحقق من الاتصال. حاول مجددًا.' });
 
-    const entryRef = db.collection('canvaGiveawayEntries').doc(hash(email));
-    const deviceRef = db.collection('canvaGiveawayGuards').doc(`device_${guardHash('device', deviceId)}`);
-    const ipRef = db.collection('canvaGiveawayGuards').doc(`ip_${guardHash('ip', ip)}`);
+    // Every submission gets a unique entry id, so the same email, browser, or
+    // network can participate more than once without being rejected.
+    const entryRef = db.collection('canvaGiveawayEntries').doc(hash(`${email}:${randomUUID()}`));
 
     const result = await db.runTransaction(async (transaction) => {
-      const [campaign, existingEntry, deviceGuard, ipGuard] = await Promise.all([
-        transaction.get(campaignRef),
-        transaction.get(entryRef),
-        transaction.get(deviceRef),
-        transaction.get(ipRef),
-      ]);
-
-      if (existingEntry.exists || deviceGuard.exists || ipGuard.exists) return { ok: false, duplicate: true };
-
+      const campaign = await transaction.get(campaignRef);
       const campaignData = campaign.data() || {};
       const limit = campaignLimit(campaignData);
       const claimed = Math.max(0, Number(campaignData.claimed || 0));
@@ -125,8 +116,6 @@ module.exports = async function handler(req, res) {
       };
 
       transaction.create(entryRef, entry);
-      transaction.create(deviceRef, { campaignId: CAMPAIGN_ID, entryId: entryRef.id, createdAt: FieldValue.serverTimestamp() });
-      transaction.create(ipRef, { campaignId: CAMPAIGN_ID, entryId: entryRef.id, createdAt: FieldValue.serverTimestamp() });
       transaction.set(campaignRef, {
         claimed: rank,
         limit,
@@ -137,7 +126,6 @@ module.exports = async function handler(req, res) {
       return { ok: true, winner: true };
     });
 
-    if (result.duplicate) return send(res, 409, { duplicate: true, message: 'هذا الإيميل أو الجهاز أو الاتصال شارك من قبل.' });
     return send(res, result.soldOut ? 409 : 200, result);
   } catch (error) {
     console.error('Giveaway API error:', error);

@@ -24,15 +24,15 @@ Completed entries are reserved atomically by `api/giveaway.js`. The private maxi
 
 - `FIREBASE_SERVICE_ACCOUNT`: the complete Firebase service-account JSON.
 - `GIVEAWAY_ADMIN_TOKEN`: a long random token for `/admin.html`.
-- `GIVEAWAY_FINGERPRINT_SALT`: a separate random value used to hash device and IP identifiers.
+- `GIVEAWAY_FINGERPRINT_SALT`: a separate random value used to hash the device and IP identifiers recorded with each entry.
 
 The admin page lists every answer and the Canva activation email, allows marking accounts as activated, changes the participant limit, resets only the current counter while preserving history, and exports CSV. Never expose server secrets in browser code.
 
 `firestore.rules` denies every direct client read/write. The landing page talks only to the Vercel server functions, whose Firebase Admin SDK access is not affected by client Security Rules.
 
-Open the deployed dashboard at `/admin.html` and paste the server-only `GIVEAWAY_ADMIN_TOKEN`. The counter-reset action keeps participation history and starts a new cycle. The red delete action removes giveaway test entries and anti-duplicate guards after a typed confirmation.
+Open the deployed dashboard at `/admin.html` and paste the server-only `GIVEAWAY_ADMIN_TOKEN`. The counter-reset action keeps participation history and starts a new cycle. The red delete action removes giveaway test entries and leftover guard records after a typed confirmation.
 
-Duplicate prize claims are blocked by email, a browser device identifier, and a salted hash of the client IP. The raw IP address is not stored.
+Every submission is accepted even when the same email, browser, or network was used before. Only the participant limit and the basic bot checks (honeypot and minimum answering time) can stop an entry.
 
 ## Daily activity log
 
