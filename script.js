@@ -153,6 +153,16 @@ const quizClose = document.getElementById('quiz-close');
 const openGiveaway = document.getElementById('open-giveaway');
 const giveawayCard = document.getElementById('canva-giveaway');
 
+function giveawayDeviceId() {
+  const key = 'unibyteGiveawayDeviceId';
+  let value = localStorage.getItem(key);
+  if (!value) {
+    value = globalThis.crypto?.randomUUID?.() || `${Date.now()}_${Math.random().toString(36).slice(2)}_${Math.random().toString(36).slice(2)}`;
+    localStorage.setItem(key, value);
+  }
+  return value;
+}
+
 const techBank = [
   { id: 'html', text: 'واش هي اللغة المستعملة لبناء هيكل صفحة الويب؟', options: ['HTML', 'Python', 'SQL', 'Photoshop'], correct: 'HTML' },
   { id: 'cpu', text: 'شنو هو الجزء اللي يسموه عقل الحاسوب؟', options: ['RAM', 'CPU', 'SSD', 'GPU'], correct: 'CPU' },
@@ -190,9 +200,9 @@ function goToOpenDay() {
   document.querySelector('.intro').scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
-function renderResult({ soldOut = false, rank = null } = {}) {
+function renderResult({ soldOut = false } = {}) {
   quizProgress.style.width = '100%';
-  quizContent.innerHTML = `<section class="quiz-step quiz-result"><div class="quiz-result-mark">${soldOut ? '!' : '✓'}</div><h2>${soldOut ? 'تم نفاد الكمية' : 'مبروك! سجلنا اشتراكك'}</h2><p>${soldOut ? 'اشتراكات الموقع خلصت، بصح كاين المزيد من اشتراكات Canva وهدايا في Open Day.' : `راك من أول المشاركين${rank ? ` — رقم ${rank}` : ''}. راح نفعّل Canva على الإيميل اللي عطيتنا.`}</p><button class="quiz-open-day" id="quiz-open-day" type="button">روح لصفحة Open Day</button></section>`;
+  quizContent.innerHTML = `<section class="quiz-step quiz-result"><div class="quiz-result-mark">${soldOut ? '!' : '✓'}</div><h2>${soldOut ? 'تم نفاد الكمية' : 'مبروك! سجلنا اشتراكك'}</h2><p>${soldOut ? 'اشتراكات الموقع خلصت، بصح كاين المزيد من اشتراكات Canva وهدايا في Open Day.' : 'تم تسجيل مشاركتك. راح نفعّل Canva على الإيميل اللي عطيتنا.'}</p><button class="quiz-open-day" id="quiz-open-day" type="button">روح لصفحة Open Day</button></section>`;
   document.getElementById('quiz-open-day').addEventListener('click', goToOpenDay);
 }
 
@@ -202,7 +212,7 @@ function renderQuiz() {
   if (giveawaySoldOut) return renderResult({ soldOut: true });
 
   if (quizStep === 0) {
-    quizContent.innerHTML = '<section class="quiz-step"><img class="quiz-canva-logo" src="assets/canva-pro-badge.png" alt="Canva Pro"><span class="quiz-overline">CANVA GIVEAWAY · 15 فقط</span><h2 id="quiz-title">10 أسئلة خفيفة<br>وفرصتك تربح Canva</h2><p>الإيميل نطلبوه منك غير في آخر خطوة، وهو نفسه اللي حاب تفعّل فيه Canva.</p><div class="quiz-actions"><button class="quiz-next" id="quiz-next" type="button">ابدأ الآن</button></div></section>';
+    quizContent.innerHTML = '<section class="quiz-step"><img class="quiz-canva-logo" src="assets/canva-pro-badge.png" alt="Canva Pro"><span class="quiz-overline">CANVA GIVEAWAY · عدد محدود</span><h2 id="quiz-title">10 أسئلة خفيفة<br>وفرصتك تربح Canva</h2><p>الإيميل نطلبوه منك غير في آخر خطوة، وهو نفسه اللي حاب تفعّل فيه Canva.</p><div class="quiz-actions"><button class="quiz-next" id="quiz-next" type="button">ابدأ الآن</button></div></section>';
   } else if (quizStep === 1) {
     quizContent.innerHTML = `<section class="quiz-step"><span class="quiz-overline">السؤال 1 من 10</span><h2 id="quiz-title">بداية، واش هو اسمك الكامل؟</h2><input class="quiz-input" id="quiz-input" value="${escapeHtml(giveawayForm.fullName)}" placeholder="الاسم واللقب" autocomplete="name" /><div class="quiz-actions"><button class="quiz-back" id="quiz-back" type="button">→</button><button class="quiz-next" id="quiz-next" type="button" ${giveawayForm.fullName.trim().length < 2 ? 'disabled' : ''}>التالي</button></div></section>`;
   } else if (quizStep <= 7) {
@@ -244,11 +254,11 @@ async function submitGiveaway() {
   submit.textContent = 'جاري التسجيل...';
   try {
     const quizAnswers = selectedTech.map((question) => ({ questionId: question.id, answer: giveawayForm.techAnswers[question.id] }));
-    const response = await fetch('/api/giveaway', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ...giveawayForm, quizAnswers, startedAt: quizStartedAt, website: '' }) });
+    const response = await fetch('/api/giveaway', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ...giveawayForm, quizAnswers, deviceId: giveawayDeviceId(), startedAt: quizStartedAt, website: '' }) });
     const payload = await response.json();
     if (payload.soldOut) { giveawaySoldOut = true; renderResult({ soldOut: true }); return; }
     if (!response.ok) throw new Error(payload.message || 'تعذر تسجيل المشاركة.');
-    renderResult({ rank: payload.rank });
+    renderResult();
   } catch (error) {
     errorBox.innerHTML = `<p class="quiz-error">${escapeHtml(error.message || 'حدث خطأ. حاول مرة أخرى.')}</p>`;
     submit.disabled = false;
@@ -281,8 +291,6 @@ fetch('/api/giveaway')
       giveawayCard.querySelector('h2').textContent = 'نشوفوك في Unibyte Open Day';
       giveawayCard.querySelector('p').textContent = 'كاين المزيد من اشتراكات Canva وهدايا للتوزيع في الفعالية.';
       openGiveaway.textContent = 'شوف Open Day';
-    } else if (Number.isFinite(status.remaining)) {
-      label.textContent = `${status.remaining} اشتراك متبقي`;
-    }
+    } else label.textContent = 'عدد محدود';
   })
   .catch(() => {});

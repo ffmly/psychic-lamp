@@ -21,29 +21,38 @@
       .admin-button:disabled { cursor: wait; opacity: .55; }
       .admin-help { margin: 20px 0; padding: 16px 18px; border: 1px solid #6812731f; border-radius: 16px; background: #faf5fc; color: #654a68; direction: rtl; text-align: right; line-height: 1.7; }
       .admin-help code { padding: 3px 7px; border-radius: 6px; background: white; color: var(--plum); font-weight: 700; }
-      .admin-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin: 20px 0; }
+      .admin-stats { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; margin: 20px 0; }
       .admin-stat { padding: 18px; border: 1px solid #68127318; border-radius: 16px; background: #faf5fc; }
       .admin-stat strong { display: block; color: var(--plum); font: 800 28px Montserrat; }
+      .admin-settings { display: flex; align-items: end; gap: 12px; flex-wrap: wrap; margin: 20px 0; padding: 18px; border: 1px solid #68127318; border-radius: 16px; background: #fff; }
+      .admin-settings label { display: grid; gap: 7px; color: #654a68; font-weight: 700; }
+      .admin-settings input { width: 160px; height: 46px; padding: 0 12px; border: 1px solid #68127335; border-radius: 12px; font: inherit; }
       .admin-table-wrap { overflow: auto; border: 1px solid #68127318; border-radius: 16px; }
-      table { width: 100%; min-width: 950px; border-collapse: collapse; font-size: 13px; }
+      table { width: 100%; min-width: 1380px; border-collapse: collapse; font-size: 13px; }
       th, td { padding: 12px; border-bottom: 1px solid #68127312; text-align: left; }
       th { color: #765879; background: #faf5fc; font-size: 10px; text-transform: uppercase; letter-spacing: .08em; }
       .activation { padding: 7px 10px; border: 0; border-radius: 999px; font-weight: 700; cursor: pointer; }
       .activation.yes { color: #176b42; background: #e7f8ef; }
       .activation.no { color: #985809; background: #fff4dc; }
-      @media (max-width: 650px) { body { padding: 10px; } .admin-page { padding: 18px; } .admin-login { flex-direction: column; } .admin-login input, .admin-login button { width: 100%; } }
+      details { min-width: 240px; }
+      details summary { color: var(--plum); font-weight: 700; cursor: pointer; }
+      .answer-list { margin: 8px 0 0; padding: 0 18px 0 0; direction: rtl; }
+      .answer-list li { margin: 5px 0; }
+      @media (max-width: 900px) { .admin-stats { grid-template-columns: repeat(2, 1fr); } }
+      @media (max-width: 650px) { body { padding: 10px; } .admin-page { padding: 18px; } .admin-login { flex-direction: column; } .admin-login input, .admin-login button { width: 100%; } .admin-actions { align-items: stretch; flex-direction: column; width: 100%; } .admin-actions button { width: 100%; } }
     </style>
     <script src="admin.js" defer></script>
   </head>
   <body>
     <main class="admin-page">
-      <header class="admin-head"><div><p class="teaser-index">OPEN DAY CAMPAIGN</p><h1>Canva Giveaway</h1></div><div class="admin-actions"><button class="admin-button" id="refresh" type="button">Refresh</button><button class="admin-button" id="export" type="button">Export CSV</button><button class="admin-button danger" id="reset-data" type="button">مسح بيانات التجارب</button></div></header>
+      <header class="admin-head"><div><p class="teaser-index">OPEN DAY CAMPAIGN</p><h1>Canva Giveaway</h1></div><div class="admin-actions"><button class="admin-button" id="refresh" type="button">تحديث</button><button class="admin-button" id="export" type="button">تصدير CSV</button><button class="admin-button" id="reset-counter" type="button">تصفير العداد مع إبقاء المشاركات</button><button class="admin-button danger" id="reset-data" type="button">مسح كل بيانات التجارب</button></div></header>
       <div class="admin-help"><strong>كيفاش تدخل؟</strong> افتح <code>/admin.html</code> في رابط الموقع، وأدخل القيمة السرية الموجودة في Vercel باسم <code>GIVEAWAY_ADMIN_TOKEN</code>. هذا الرمز يبقى عند الأدمن فقط ولا تحطّه في كود الواجهة.</div>
       <form class="admin-login" id="admin-login"><input id="admin-token" type="password" autocomplete="current-password" placeholder="Admin token" /><button class="admin-button" type="submit">Open dashboard</button></form>
       <p id="admin-message"></p>
       <section id="admin-content" hidden>
-        <div class="admin-stats"><div class="admin-stat"><strong id="claimed">0</strong>Claimed</div><div class="admin-stat"><strong id="activated">0</strong>Activated</div><div class="admin-stat"><strong id="pending">0</strong>Pending</div></div>
-        <div class="admin-table-wrap"><table><thead><tr><th>#</th><th>Name</th><th>Canva email</th><th>Year</th><th>Knows Unibyte</th><th>Attendance</th><th>Interest</th><th>Score</th><th>Activation</th></tr></thead><tbody id="entries"></tbody></table></div>
+        <div class="admin-stats"><div class="admin-stat"><strong id="claimed">0</strong>العداد الحالي</div><div class="admin-stat"><strong id="limit">0</strong>الحد الأقصى</div><div class="admin-stat"><strong id="cycle">1</strong>الدورة</div><div class="admin-stat"><strong id="activated">0</strong>تم تفعيلهم</div><div class="admin-stat"><strong id="pending">0</strong>في الانتظار</div></div>
+        <form class="admin-settings" id="limit-form"><label>عدد المشاركات المسموح بها<input id="participant-limit" type="number" min="1" max="5000" required /></label><button class="admin-button" type="submit">حفظ العدد</button></form>
+        <div class="admin-table-wrap"><table><thead><tr><th>الدورة / الترتيب</th><th>الاسم</th><th>إيميل Canva</th><th>السنة</th><th>يعرف النادي؟</th><th>الحضور</th><th>مصدر التعرف</th><th>المجال</th><th>النشاط</th><th>إجابات الكويز</th><th>النتيجة</th><th>التفعيل</th><th>وقت المشاركة</th></tr></thead><tbody id="entries"></tbody></table></div>
       </section>
     </main>
   </body>

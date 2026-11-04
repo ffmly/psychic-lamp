@@ -20,14 +20,19 @@ The active **Our Page** link opens the club's Instagram profile. Registration is
 
 ## Canva giveaway setup
 
-The first 15 completed entries are reserved atomically by `api/giveaway.js`. Configure the two server-only values from `.env.example` in Vercel:
+Completed entries are reserved atomically by `api/giveaway.js`. The private maximum is configurable from the admin dashboard and is never exposed by the public API. Configure the server-only values from `.env.example` in Vercel:
 
 - `FIREBASE_SERVICE_ACCOUNT`: the complete Firebase service-account JSON.
 - `GIVEAWAY_ADMIN_TOKEN`: a long random token for `/admin.html`.
+- `GIVEAWAY_FINGERPRINT_SALT`: a separate random value used to hash device and IP identifiers.
 
-The admin page lists the Canva activation email as the final field, allows marking accounts as activated, and exports CSV. Never expose either secret in browser code.
+The admin page lists every answer and the Canva activation email, allows marking accounts as activated, changes the participant limit, resets only the current counter while preserving history, and exports CSV. Never expose server secrets in browser code.
 
-Open the deployed dashboard at `/admin.html` and paste the server-only `GIVEAWAY_ADMIN_TOKEN`. The red reset button deletes giveaway test entries and resets the campaign counter to zero after a typed confirmation.
+`firestore.rules` denies every direct client read/write. The landing page talks only to the Vercel server functions, whose Firebase Admin SDK access is not affected by client Security Rules.
+
+Open the deployed dashboard at `/admin.html` and paste the server-only `GIVEAWAY_ADMIN_TOKEN`. The counter-reset action keeps participation history and starts a new cycle. The red delete action removes giveaway test entries and anti-duplicate guards after a typed confirmation.
+
+Duplicate prize claims are blocked by email, a browser device identifier, and a salted hash of the client IP. The raw IP address is not stored.
 
 ## Daily activity log
 

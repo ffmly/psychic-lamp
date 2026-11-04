@@ -3,7 +3,9 @@ const tokenInput = document.getElementById('admin-token');
 const message = document.getElementById('admin-message');
 const content = document.getElementById('admin-content');
 const tbody = document.getElementById('entries');
+const limitInput = document.getElementById('participant-limit');
 let entries = [];
+let campaign = { claimed: 0, limit: 15, cycle: 1 };
 
 tokenInput.value = sessionStorage.getItem('unibyteGiveawayAdminToken') || '';
 
@@ -11,69 +13,120 @@ function escapeHtml(value) {
   return String(value ?? '').replace(/[&<>'"]/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' })[char]);
 }
 
+function authHeaders(withJson = false) {
+  return {
+    ...(withJson ? { 'Content-Type': 'application/json' } : {}),
+    Authorization: `Bearer ${tokenInput.value.trim()}`,
+  };
+}
+
+function answerDetails(entry) {
+  const answers = Array.isArray(entry.quizAnswers) ? entry.quizAnswers : [];
+  const items = answers.map((answer) => `<li><strong>${escapeHtml(answer.questionId)}</strong>: ${escapeHtml(answer.answer)} ${answer.correct ? '✓' : '✗'}</li>`).join('');
+  return `<details><summary>عرض كل الإجابات</summary><ul class="answer-list"><li>السنة: ${escapeHtml(entry.studyYear)}</li><li>سمع بالنادي: ${escapeHtml(entry.heardAboutUnibyte)}</li><li>الحضور: ${escapeHtml(entry.willAttend)}</li><li>عرفنا عبر: ${escapeHtml(entry.discoverySource)}</li><li>المجال: ${escapeHtml(entry.interest)}</li><li>النشاط: ${escapeHtml(entry.preferredActivity)}</li>${items}</ul></details>`;
+}
+
+async function request(url, options = {}) {
+  const response = await fetch(url, options);
+  const payload = await response.json().catch(() => ({}));
+  if (!response.ok) throw new Error(payload.message || 'فشل الطلب.');
+  return payload;
+}
+
 async function loadEntries() {
   const token = tokenInput.value.trim();
   if (!token) return;
-  message.textContent = 'Loading…';
-  const response = await fetch('/api/admin', { headers: { Authorization: `Bearer ${token}` } });
-  const payload = await response.json();
-  if (!response.ok) { content.hidden = true; message.textContent = payload.message || 'Could not open dashboard.'; return; }
-  sessionStorage.setItem('unibyteGiveawayAdminToken', token);
-  entries = payload.entries || [];
-  message.textContent = '';
-  content.hidden = false;
-  document.getElementById('claimed').textContent = entries.length;
-  document.getElementById('activated').textContent = entries.filter((entry) => entry.activated).length;
-  document.getElementById('pending').textContent = entries.filter((entry) => !entry.activated).length;
-  tbody.innerHTML = entries.map((entry) => `<tr><td>${entry.rank}</td><td><strong>${escapeHtml(entry.fullName)}</strong></td><td><a href="mailto:${encodeURIComponent(entry.email)}">${escapeHtml(entry.email)}</a></td><td>${escapeHtml(entry.studyYear)}</td><td>${entry.heardAboutUnibyte === 'yes' ? 'Yes' : 'No'}</td><td>${escapeHtml(entry.willAttend)}</td><td>${escapeHtml(entry.interest)}</td><td>${entry.score}/3</td><td><button class="activation ${entry.activated ? 'yes' : 'no'}" data-id="${entry.id}" data-active="${entry.activated}" type="button">${entry.activated ? 'Activated' : 'Mark activated'}</button></td></tr>`).join('');
-  document.querySelectorAll('.activation').forEach((button) => button.addEventListener('click', () => updateActivation(button)));
+  message.textContent = 'جاري التحميل…';
+  try {
+    const payload = await request('/api/admin', { headers: authHeaders() });
+    sessionStorage.setItem('unibyteGiveawayAdminToken', token);
+    entries = payload.entries || [];
+    campaign = payload.campaign || campaign;
+    content.hidden = false;
+    message.textContent = '';
+    document.getElementById('claimed').textContent = campaign.claimed;
+    document.getElementById('limit').textContent = campaign.limit;
+    document.getElementById('cycle').textContent = campaign.cycle;
+    document.getElementById('activated').textContent = entries.filter((entry) => entry.activated).length;
+    document.getElementById('pending').textContent = entries.filter((entry) => !entry.activated).length;
+    limitInput.value = campaign.limit;
+    tbody.innerHTML = entries.map((entry) => `<tr><td>${escapeHtml(entry.cycle || 1)} / ${escapeHtml(entry.rank)}</td><td><strong>${escapeHtml(entry.fullName)}</strong></td><td><a href="mailto:${encodeURIComponent(entry.email)}">${escapeHtml(entry.email)}</a></td><td>${escapeHtml(entry.studyYear)}</td><td>${escapeHtml(entry.heardAboutUnibyte)}</td><td>${escapeHtml(entry.willAttend)}</td><td>${escapeHtml(entry.discoverySource)}</td><td>${escapeHtml(entry.interest)}</td><td>${escapeHtml(entry.preferredActivity)}</td><td>${answerDetails(entry)}</td><td>${escapeHtml(entry.score)}/3</td><td><button class="activation ${entry.activated ? 'yes' : 'no'}" data-id="${entry.id}" data-active="${entry.activated}" type="button">${entry.activated ? 'تم التفعيل' : 'علّم كمفعّل'}</button></td><td>${entry.submittedAt ? new Date(entry.submittedAt).toLocaleString('ar-DZ') : '—'}</td></tr>`).join('');
+    document.querySelectorAll('.activation').forEach((button) => button.addEventListener('click', () => updateActivation(button)));
+  } catch (error) {
+    content.hidden = true;
+    message.textContent = error.message || 'تعذر فتح لوحة الأدمن.';
+  }
 }
 
 async function updateActivation(button) {
   button.disabled = true;
-  const response = await fetch('/api/admin', { method: 'PATCH', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${tokenInput.value.trim()}` }, body: JSON.stringify({ id: button.dataset.id, activated: button.dataset.active !== 'true' }) });
-  if (response.ok) await loadEntries(); else { button.disabled = false; message.textContent = 'Update failed.'; }
+  try {
+    await request('/api/admin', {
+      method: 'PATCH',
+      headers: authHeaders(true),
+      body: JSON.stringify({ id: button.dataset.id, activated: button.dataset.active !== 'true' }),
+    });
+    await loadEntries();
+  } catch (error) {
+    button.disabled = false;
+    message.textContent = error.message;
+  }
 }
 
 login.addEventListener('submit', (event) => { event.preventDefault(); loadEntries(); });
 document.getElementById('refresh').addEventListener('click', loadEntries);
+
+document.getElementById('limit-form').addEventListener('submit', async (event) => {
+  event.preventDefault();
+  const limit = Number(limitInput.value);
+  message.textContent = 'جاري حفظ العدد…';
+  try {
+    await request('/api/admin', { method: 'PATCH', headers: authHeaders(true), body: JSON.stringify({ action: 'setLimit', limit }) });
+    await loadEntries();
+    message.textContent = 'تم تحديث العدد بنجاح.';
+  } catch (error) {
+    message.textContent = error.message;
+  }
+});
+
+document.getElementById('reset-counter').addEventListener('click', async () => {
+  const confirmation = window.prompt('سيعود العداد إلى 0 وتبقى كل المشاركات والمعلومات. اكتب COUNTER للتأكيد:');
+  if (confirmation !== 'COUNTER') return;
+  try {
+    await request('/api/admin', { method: 'POST', headers: authHeaders(true), body: JSON.stringify({ action: 'resetCounter', confirmation: 'RESET-COUNTER' }) });
+    await loadEntries();
+    message.textContent = 'تم تصفير العداد وبدأت دورة جديدة مع إبقاء المشاركات.';
+  } catch (error) {
+    message.textContent = error.message;
+  }
+});
+
 document.getElementById('export').addEventListener('click', () => {
   if (!entries.length) return;
-  const rows = [['Rank', 'Name', 'Canva email', 'Year', 'Knows Unibyte', 'Attendance', 'Interest', 'Score', 'Activated'], ...entries.map((entry) => [entry.rank, entry.fullName, entry.email, entry.studyYear, entry.heardAboutUnibyte, entry.willAttend, entry.interest, `${entry.score}/3`, entry.activated ? 'Yes' : 'No'])];
-  const csv = rows.map((row) => row.map((cell) => `"${String(cell).replaceAll('"', '""')}"`).join(',')).join('\n');
+  const rows = [['Cycle', 'Rank', 'Name', 'Canva email', 'Year', 'Knows Unibyte', 'Attendance', 'Discovery source', 'Interest', 'Preferred activity', 'Quiz answers', 'Score', 'Activated', 'Submitted at'], ...entries.map((entry) => [entry.cycle || 1, entry.rank, entry.fullName, entry.email, entry.studyYear, entry.heardAboutUnibyte, entry.willAttend, entry.discoverySource, entry.interest, entry.preferredActivity, (entry.quizAnswers || []).map((answer) => `${answer.questionId}: ${answer.answer} (${answer.correct ? 'correct' : 'wrong'})`).join(' | '), `${entry.score}/3`, entry.activated ? 'Yes' : 'No', entry.submittedAt || ''])];
+  const csv = rows.map((row) => row.map((cell) => `"${String(cell ?? '').replaceAll('"', '""')}"`).join(',')).join('\n');
   const url = URL.createObjectURL(new Blob([`\uFEFF${csv}`], { type: 'text/csv' }));
-  const link = document.createElement('a'); link.href = url; link.download = 'unibyte-canva-giveaway.csv'; link.click(); URL.revokeObjectURL(url);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = 'unibyte-canva-giveaway.csv';
+  link.click();
+  URL.revokeObjectURL(url);
 });
 
 document.getElementById('reset-data').addEventListener('click', async () => {
   const token = tokenInput.value.trim();
-  if (!token) {
-    message.textContent = 'أدخل Admin token أولًا.';
-    tokenInput.focus();
-    return;
-  }
-
-  const confirmation = window.prompt('هذا يمسح كل المشاركات ويعيد العدد إلى 0. اكتب RESET للتأكيد:');
-  if (confirmation !== 'RESET') {
-    message.textContent = confirmation === null ? 'تم إلغاء المسح.' : 'كلمة التأكيد غير صحيحة.';
-    return;
-  }
-
+  if (!token) { message.textContent = 'أدخل Admin token أولًا.'; tokenInput.focus(); return; }
+  const confirmation = window.prompt('هذا يمسح المشاركات وحماية IP والجهاز ويعيد الإعدادات. اكتب DELETE للتأكيد:');
+  if (confirmation !== 'DELETE') { message.textContent = confirmation === null ? 'تم إلغاء المسح.' : 'كلمة التأكيد غير صحيحة.'; return; }
   const button = document.getElementById('reset-data');
   button.disabled = true;
   message.textContent = 'جاري مسح بيانات التجارب…';
   try {
-    const response = await fetch('/api/admin', {
-      method: 'DELETE',
-      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-      body: JSON.stringify({ confirmation: 'RESET-CANVA-GIVEAWAY' }),
-    });
-    const payload = await response.json();
-    if (!response.ok) throw new Error(payload.message || 'تعذر مسح البيانات.');
-    message.textContent = `تم مسح ${payload.deleted || 0} مشاركة وإعادة العدد إلى 0.`;
+    const payload = await request('/api/admin', { method: 'DELETE', headers: authHeaders(true), body: JSON.stringify({ confirmation: 'DELETE-ALL-GIVEAWAY-DATA' }) });
     await loadEntries();
+    message.textContent = `تم مسح ${payload.deletedEntries || 0} مشاركة وإعادة النظام إلى البداية.`;
   } catch (error) {
-    message.textContent = error.message || 'تعذر مسح البيانات.';
+    message.textContent = error.message;
   } finally {
     button.disabled = false;
   }
