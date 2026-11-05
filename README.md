@@ -12,6 +12,8 @@ python -m http.server 4173
 
 Then open `http://localhost:4173`.
 
+This static server previews the page and teaser only. It does not execute the Vercel functions in `api/`, so giveaway submissions and the admin dashboard cannot be tested through this command. Use a Vercel environment with the server variables below when checking those flows.
+
 The vertical teaser is stored at `assets/Open_Day.mp4` and uses the original custom player with playback, seeking, mute, and fullscreen.
 
 ## Registration and links
