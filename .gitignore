@@ -1,4 +1,10 @@
 .env
 .env.local
+.env.*
+!.env.example
 .vercel
 node_modules
+*service-account*.json
+firebase-adminsdk*.json
+*.pem
+*.key
