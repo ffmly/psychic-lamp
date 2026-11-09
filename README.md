@@ -32,6 +32,8 @@ The admin page lists every answer and the Canva activation email, allows marking
 
 `firestore.rules` denies every direct client read/write. The landing page talks only to the Vercel server functions, whose Firebase Admin SDK access is not affected by client Security Rules.
 
+After deployment, open `/api/giveaway` on the deployed domain to check the public API. A healthy response is JSON containing a boolean `soldOut` field. This GET request reads campaign state and does not reserve an entry; a server error indicates the function or Firebase configuration needs attention.
+
 Open the deployed dashboard at `/admin.html` and paste the server-only `GIVEAWAY_ADMIN_TOKEN`. The counter-reset action keeps participation history and starts a new cycle. The red delete action removes giveaway test entries and leftover guard records after a typed confirmation.
 
 Every submission is accepted even when the same email, browser, or network was used before. Only the participant limit and the basic bot checks (honeypot and minimum answering time) can stop an entry.
