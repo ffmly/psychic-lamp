@@ -30,6 +30,8 @@ Completed entries are reserved atomically by `api/giveaway.js`. The private maxi
 
 The admin page lists every answer and the Canva activation email, allows marking accounts as activated, changes the participant limit, resets only the current counter while preserving history, and exports CSV. Never expose server secrets in browser code.
 
+The dashboard and its CSV export load the 1,000 newest entries (`api/admin.js` limits the query to 1,000). If a campaign can exceed that size, raise the limit or add pagination before relying on the export as a complete archive.
+
 `firestore.rules` denies every direct client read/write. The landing page talks only to the Vercel server functions, whose Firebase Admin SDK access is not affected by client Security Rules.
 
 After deployment, open `/api/giveaway` on the deployed domain to check the public API. A healthy response is JSON containing a boolean `soldOut` field. This GET request reads campaign state and does not reserve an entry; a server error indicates the function or Firebase configuration needs attention.
