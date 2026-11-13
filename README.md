@@ -36,6 +36,8 @@ The dashboard and its CSV export load the 1,000 newest entries (`api/admin.js` l
 
 After deployment, open `/api/giveaway` on the deployed domain to check the public API. A healthy response is JSON containing a boolean `soldOut` field. This GET request reads campaign state and does not reserve an entry; a server error indicates the function or Firebase configuration needs attention.
 
+Before sharing the page for an event, check the deployed registration copy and Instagram link, confirm `/api/giveaway` responds, and verify the intended participant limit in `/admin.html`. The static preview cannot confirm the API or dashboard configuration.
+
 Open the deployed dashboard at `/admin.html` and paste the server-only `GIVEAWAY_ADMIN_TOKEN`. The counter-reset action keeps participation history and starts a new cycle. The red delete action removes giveaway test entries and leftover guard records after a typed confirmation.
 
 Every submission is accepted even when the same email, browser, or network was used before. Only the participant limit and the basic bot checks (honeypot and minimum answering time) can stop an entry.
